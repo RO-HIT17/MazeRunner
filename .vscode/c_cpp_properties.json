@@ -3,7 +3,8 @@
     {
       "name": "windows-gcc-x64",
       "includePath": [
-        "${workspaceFolder}/**"
+        "${workspaceFolder}/**",
+        "C:\\Rohit\\Projects\\MazeRunner\\emsdk\\upstream\\emscripten\\system\\include"
       ],
       "compilerPath": "gcc",
       "cStandard": "${default}",

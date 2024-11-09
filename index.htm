@@ -11,28 +11,29 @@
 <body>
     <h1>Maze Generator</h1>
     <canvas id="mazeCanvas" width="500" height="500"></canvas>
+    <script src="maze.js"></script>
     <script>
-        const canvas = document.getElementById('mazeCanvas');
-        const ctx = canvas.getContext('2d');
+        const WIDTH = 20;
+        const HEIGHT = 20;
+        const cellSize = 25;
 
-        fetch('maze.txt')
-            .then(response => response.text())
-            .then(data => {
-                const maze = data.trim().split('\n').map(row => row.split(''));
-                const cellSize = canvas.width / maze[0].length;
+        Maze().then(Module => {
+            Module._generateMaze();
 
-                for (let y = 0; y < maze.length; y++) {
-                    for (let x = 0; x < maze[y].length; x++) {
-                        if (maze[y][x] === '1') {
-                            ctx.fillStyle = 'black';
-                            ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                        } else {
-                            ctx.fillStyle = 'white';
-                            ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                        }
-                    }
-                }
-            });
+            const mazePtr = Module._getMaze();
+            const mazeSize = WIDTH * HEIGHT;
+            const mazeData = new Uint8Array(Module.HEAP8.buffer, mazePtr, mazeSize);
+
+            const canvas = document.getElementById('mazeCanvas');
+            const ctx = canvas.getContext('2d');
+
+            for (let i = 0; i < mazeSize; i++) {
+                const x = i % WIDTH;
+                const y = Math.floor(i / WIDTH);
+                ctx.fillStyle = mazeData[i] ? 'black' : 'white';
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            }
+        });
     </script>
 </body>
 </html>
