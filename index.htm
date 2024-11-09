@@ -4,35 +4,75 @@
     <title>Maze Generator</title>
     <style>
         canvas {
-            border: 1px solid black;
+            border: 2px solid #333;
+            background-color: #fff;
         }
     </style>
 </head>
 <body>
     <h1>Maze Generator</h1>
-    <canvas id="mazeCanvas" width="500" height="500"></canvas>
+    <canvas id="mazeCanvas" width="600" height="600"></canvas>
     <script src="maze.js"></script>
     <script>
-        const WIDTH = 20;
-        const HEIGHT = 20;
-        const cellSize = 25;
+        const canvas = document.getElementById('mazeCanvas');
+        const ctx = canvas.getContext('2d');
 
-        Maze().then(Module => {
-            Module._generateMaze();
-            console.log('WASM Module Loaded');
+        const mazeSize = 20;
+        const cellSize = canvas.width / mazeSize;
+
+        MazeModule().then(Module => {
+            Module._generateMaze(mazeSize);
             const mazePtr = Module._getMaze();
-            const mazeSize = WIDTH * HEIGHT;
-            const mazeData = new Uint8Array(Module.HEAP8.buffer, mazePtr, mazeSize);
+            const size = Module._getMazeSize();
 
-            const canvas = document.getElementById('mazeCanvas');
-            const ctx = canvas.getContext('2d');
+            const mazeData = new Int32Array(Module.HEAP32.buffer, mazePtr, size * size * 4);
 
-            for (let i = 0; i < mazeSize; i++) {
-                const x = i % WIDTH;
-                const y = Math.floor(i / WIDTH);
-                ctx.fillStyle = mazeData[i] ? 'black' : 'white';
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            function drawMaze() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+
+                for (let y = 0; y < size; y++) {
+                    for (let x = 0; x < size; x++) {
+                        const baseIndex = (y * size + x) * 4;
+                        const walls = mazeData.slice(baseIndex, baseIndex + 4);
+
+                        const xPos = x * cellSize;
+                        const yPos = y * cellSize;
+
+                        // Top wall
+                        if (walls[0]) {
+                            ctx.beginPath();
+                            ctx.moveTo(xPos, yPos);
+                            ctx.lineTo(xPos + cellSize, yPos);
+                            ctx.stroke();
+                        }
+                        // Right wall
+                        if (walls[1]) {
+                            ctx.beginPath();
+                            ctx.moveTo(xPos + cellSize, yPos);
+                            ctx.lineTo(xPos + cellSize, yPos + cellSize);
+                            ctx.stroke();
+                        }
+                        // Bottom wall
+                        if (walls[2]) {
+                            ctx.beginPath();
+                            ctx.moveTo(xPos + cellSize, yPos + cellSize);
+                            ctx.lineTo(xPos, yPos + cellSize);
+                            ctx.stroke();
+                        }
+                        // Left wall
+                        if (walls[3]) {
+                            ctx.beginPath();
+                            ctx.moveTo(xPos, yPos + cellSize);
+                            ctx.lineTo(xPos, yPos);
+                            ctx.stroke();
+                        }
+                    }
+                }
             }
+
+            drawMaze();
         });
     </script>
 </body>

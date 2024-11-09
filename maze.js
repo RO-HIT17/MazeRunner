@@ -1,5 +1,5 @@
 
-var Maze = (() => {
+var MazeModule = (() => {
   var _scriptName = typeof document != 'undefined' ? document.currentScript?.src : undefined;
   if (typeof __filename != 'undefined') _scriptName = _scriptName || __filename;
   return (
@@ -28,7 +28,7 @@ var readyPromise = new Promise((resolve, reject) => {
   readyPromiseResolve = resolve;
   readyPromiseReject = reject;
 });
-["_generateMaze","_getMaze","_memory","___indirect_function_table","onRuntimeInitialized"].forEach((prop) => {
+["_generateMaze","_getMaze","_getMazeSize","_memory","___indirect_function_table","onRuntimeInitialized"].forEach((prop) => {
   if (!Object.getOwnPropertyDescriptor(readyPromise, prop)) {
     Object.defineProperty(readyPromise, prop, {
       get: () => abort('You are getting ' + prop + ' on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js'),
@@ -1004,8 +1004,9 @@ var wasmImports = {
 };
 var wasmExports = createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors', 0);
-var _generateMaze = Module['_generateMaze'] = createExportWrapper('generateMaze', 0);
+var _generateMaze = Module['_generateMaze'] = createExportWrapper('generateMaze', 1);
 var _getMaze = Module['_getMaze'] = createExportWrapper('getMaze', 0);
+var _getMazeSize = Module['_getMazeSize'] = createExportWrapper('getMazeSize', 0);
 var _fflush = createExportWrapper('fflush', 1);
 var _emscripten_stack_init = () => (_emscripten_stack_init = wasmExports['emscripten_stack_init'])();
 var _emscripten_stack_get_free = () => (_emscripten_stack_get_free = wasmExports['emscripten_stack_get_free'])();
@@ -1444,6 +1445,6 @@ for (const prop of Object.keys(Module)) {
 );
 })();
 if (typeof exports === 'object' && typeof module === 'object')
-  module.exports = Maze;
+  module.exports = MazeModule;
 else if (typeof define === 'function' && define['amd'])
-  define([], () => Maze);
+  define([], () => MazeModule);
