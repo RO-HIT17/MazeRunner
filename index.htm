@@ -19,7 +19,7 @@
 
         Maze().then(Module => {
             Module._generateMaze();
-
+            console.log('WASM Module Loaded');
             const mazePtr = Module._getMaze();
             const mazeSize = WIDTH * HEIGHT;
             const mazeData = new Uint8Array(Module.HEAP8.buffer, mazePtr, mazeSize);

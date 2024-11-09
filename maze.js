@@ -1,5 +1,5 @@
 
-var Module = (() => {
+var Maze = (() => {
   var _scriptName = typeof document != 'undefined' ? document.currentScript?.src : undefined;
   if (typeof __filename != 'undefined') _scriptName = _scriptName || __filename;
   return (
@@ -1444,6 +1444,6 @@ for (const prop of Object.keys(Module)) {
 );
 })();
 if (typeof exports === 'object' && typeof module === 'object')
-  module.exports = Module;
+  module.exports = Maze;
 else if (typeof define === 'function' && define['amd'])
-  define([], () => Module);
+  define([], () => Maze);
