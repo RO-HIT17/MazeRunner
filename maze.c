@@ -40,6 +40,10 @@ int pathLength;
 Point explorationSteps[MAX_SIZE * MAX_SIZE];
 int explorationStepCount;
 
+
+Point startPoint;
+Point endPoint;
+
 void initGraph() {
     for (int y = 0; y < MAX_SIZE; y++) {
         for (int x = 0; x < MAX_SIZE; x++) {
@@ -76,7 +80,7 @@ void carvePassagesFrom(int cx, int cy) {
             case 0: ny = cy - 1; break; 
             case 1: nx = cx + 1; break; 
             case 2: ny = cy + 1; break; 
-            case 3: nx = cx - 1; break;     
+            case 3: nx = cx - 1; break; 
         }
 
         if (nx >= 0 && nx < mazeSize && ny >= 0 && ny < mazeSize && !visited[ny][nx]) {
@@ -97,6 +101,35 @@ void generateMaze(int size) {
 
     srand(time(NULL));
     carvePassagesFrom(0, 0);
+
+
+    startPoint.x = rand() % mazeSize;
+    startPoint.y = rand() % mazeSize;
+
+    do {
+        endPoint.x = rand() % mazeSize;
+        endPoint.y = rand() % mazeSize;
+    } while (endPoint.x == startPoint.x && endPoint.y == startPoint.y);
+}
+
+EMSCRIPTEN_KEEPALIVE
+int getStartX() {
+    return startPoint.x;
+}
+
+EMSCRIPTEN_KEEPALIVE
+int getStartY() {
+    return startPoint.y;
+}
+
+EMSCRIPTEN_KEEPALIVE
+int getEndX() {
+    return endPoint.x;
+}
+
+EMSCRIPTEN_KEEPALIVE
+int getEndY() {
+    return endPoint.y;
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -105,10 +138,10 @@ int* getMaze() {
     int index = 0;
     for (int y = 0; y < mazeSize; y++) {
         for (int x = 0; x < mazeSize; x++) {
-            maze[index] = 1;     // Top wall
-            maze[index + 1] = 1; // Right wall
-            maze[index + 2] = 1; // Bottom wall
-            maze[index + 3] = 1; // Left wall
+            maze[index] = 1;     
+            maze[index + 1] = 1; 
+            maze[index + 2] = 1; 
+            maze[index + 3] = 1; 
 
             Node* node = graph[y][x].head;
             while (node != NULL) {
@@ -221,7 +254,7 @@ void freeQueue(Queue* queue) {
 EMSCRIPTEN_KEEPALIVE
 void solveMazeDFS() {
     Stack* stack = createStack(mazeSize * mazeSize);
-    push(stack, (Point){0, 0});
+    push(stack, startPoint);
     explorationStepCount = 0;
     memset(visited, 0, sizeof(visited));
     pathLength = 0;
@@ -231,13 +264,14 @@ void solveMazeDFS() {
         int x = p.x;
         int y = p.y;
 
+        if (x < 0 || x >= mazeSize || y < 0 || y >= mazeSize) continue;
         if (visited[y][x]) continue;
         visited[y][x] = 1;
         explorationSteps[explorationStepCount++] = p;
 
         path[pathLength++] = p;
 
-        if (x == mazeSize - 1 && y == mazeSize - 1) {
+        if (x == endPoint.x && y == endPoint.y) {
             
             break;
         }
@@ -258,7 +292,7 @@ void solveMazeDFS() {
 EMSCRIPTEN_KEEPALIVE
 void solveMazeBFS() {
     Queue* queue = createQueue(mazeSize * mazeSize);
-    enqueue(queue, (Point){0, 0});
+    enqueue(queue, startPoint);
     explorationStepCount = 0;
     memset(visited, 0, sizeof(visited));
     pathLength = 0;
@@ -273,11 +307,12 @@ void solveMazeBFS() {
         int x = p.x;
         int y = p.y;
 
+        if (x < 0 || x >= mazeSize || y < 0 || y >= mazeSize) continue;
         if (visited[y][x]) continue;
         visited[y][x] = 1;
         explorationSteps[explorationStepCount++] = p;
 
-        if (x == mazeSize - 1 && y == mazeSize - 1) {
+        if (x == endPoint.x && y == endPoint.y) {
             
             pathLength = 0;
             Point curr = p;
