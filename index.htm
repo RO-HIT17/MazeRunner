@@ -222,30 +222,10 @@
                 await sleep(50); 
             }
 
-            for (let i = pathLength - 1; i >= 0; i--) {
-                drawMaze();
-
-                
-                ctx.fillStyle = 'rgba(255, 165, 0, 0.5)'; 
-                for (let j = 0; j < explorationCount; j++) {
-                    const x = explorationData[j * 2];
-                    const y = explorationData[j * 2 + 1];
-                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                }
-
-                
-                ctx.fillStyle = 'rgba(0, 255, 0, 0.5)'; 
-                for (let j = pathLength - 1; j >= i; j--) {
-                    const x = pathData[j * 2];
-                    const y = pathData[j * 2 + 1];
-                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                }
-
-                await sleep(100); 
-            }
-
+            
             drawMaze();
 
+            
             ctx.fillStyle = 'rgba(255, 165, 0, 0.5)';
             for (let i = 0; i < explorationCount; i++) {
                 const x = explorationData[i * 2];
@@ -253,14 +233,23 @@
                 ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
             }
 
-            ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
-            for (let i = 0; i < pathLength; i++) {
-                const x = pathData[i * 2];
-                const y = pathData[i * 2 + 1];
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            
+            ctx.strokeStyle = 'green';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            const startX = pathData[(pathLength - 1) * 2] * cellSize + cellSize / 2;
+            const startY = pathData[(pathLength - 1) * 2 + 1] * cellSize + cellSize / 2;
+            ctx.moveTo(startX, startY);
+
+            for (let i = pathLength - 2; i >= 0; i--) {
+                const x = pathData[i * 2] * cellSize + cellSize / 2;
+                const y = pathData[i * 2 + 1] * cellSize + cellSize / 2;
+                ctx.lineTo(x, y);
             }
+            ctx.stroke();
         }
 
+        
         document.addEventListener('keydown', function(e) {
             if (gameFinished) return;
 
@@ -283,6 +272,7 @@
 
                 drawMaze();
 
+                
                 if (player.x === endPoint.x && player.y === endPoint.y) {
                     gameFinished = true;
                     document.getElementById('message').innerText = 'Congratulations! You reached the destination!';

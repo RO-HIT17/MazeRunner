@@ -259,6 +259,11 @@ void solveMazeDFS() {
     memset(visited, 0, sizeof(visited));
     pathLength = 0;
 
+    int previous[MAX_SIZE][MAX_SIZE][2];
+    for (int y = 0; y < mazeSize; y++)
+        for (int x = 0; x < mazeSize; x++)
+            previous[y][x][0] = previous[y][x][1] = -1;
+
     while (!isStackEmpty(stack)) {
         Point p = pop(stack);
         int x = p.x;
@@ -269,10 +274,17 @@ void solveMazeDFS() {
         visited[y][x] = 1;
         explorationSteps[explorationStepCount++] = p;
 
-        path[pathLength++] = p;
-
         if (x == endPoint.x && y == endPoint.y) {
             
+            pathLength = 0;
+            Point curr = p;
+            while (curr.x != -1 && curr.y != -1) {
+                path[pathLength++] = curr;
+                int px = previous[curr.y][curr.x][0];
+                int py = previous[curr.y][curr.x][1];
+                curr.x = px;
+                curr.y = py;
+            }
             break;
         }
 
@@ -280,6 +292,8 @@ void solveMazeDFS() {
         while (node != NULL) {
             if (!visited[node->y][node->x]) {
                 push(stack, (Point){node->x, node->y});
+                previous[node->y][node->x][0] = x;  
+                previous[node->y][node->x][1] = y;
             }
             node = node->next;
         }
