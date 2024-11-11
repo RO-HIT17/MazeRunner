@@ -1,16 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Maze Generator</title>
+    <title>Maze Generator and Solver</title>
     <style>
         canvas {
             border: 2px solid #333;
             background-color: #fff;
         }
+        #controls {
+            margin: 20px;
+        }
+        #controls button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <h1>Maze Generator</h1>
+    <h1>Maze Generator and Solver</h1>
+    <div id="controls">
+        <button id="solveDFS">Solve with DFS</button>
+        <button id="solveBFS">Solve with BFS</button>
+    </div>
     <canvas id="mazeCanvas" width="600" height="600"></canvas>
     <script src="maze.js"></script>
     <script>
@@ -20,7 +33,11 @@
         const mazeSize = 20;
         const cellSize = canvas.width / mazeSize;
 
-        MazeModule().then(Module => {
+        let player = { x: 0, y: 0 };
+        let Module;
+
+        MazeModule().then(async (mod) => {
+            Module = mod;
             Module._generateMaze(mazeSize);
             const mazePtr = Module._getMaze();
             const size = Module._getMazeSize();
@@ -40,28 +57,28 @@
                         const xPos = x * cellSize;
                         const yPos = y * cellSize;
 
-                        // Top wall
+                        
                         if (walls[0]) {
                             ctx.beginPath();
                             ctx.moveTo(xPos, yPos);
                             ctx.lineTo(xPos + cellSize, yPos);
                             ctx.stroke();
                         }
-                        // Right wall
+                        
                         if (walls[1]) {
                             ctx.beginPath();
                             ctx.moveTo(xPos + cellSize, yPos);
                             ctx.lineTo(xPos + cellSize, yPos + cellSize);
                             ctx.stroke();
                         }
-                        // Bottom wall
+                        
                         if (walls[2]) {
                             ctx.beginPath();
                             ctx.moveTo(xPos + cellSize, yPos + cellSize);
                             ctx.lineTo(xPos, yPos + cellSize);
                             ctx.stroke();
                         }
-                        // Left wall
+                        
                         if (walls[3]) {
                             ctx.beginPath();
                             ctx.moveTo(xPos, yPos + cellSize);
@@ -70,9 +87,127 @@
                         }
                     }
                 }
+
+                
+                ctx.fillStyle = 'red';
+                ctx.beginPath();
+                ctx.arc(
+                    player.x * cellSize + cellSize / 2,
+                    player.y * cellSize + cellSize / 2,
+                    cellSize * 0.3,
+                    0,
+                    2 * Math.PI
+                );
+                ctx.fill();
+            }
+
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            async function animateSearchAndPath() {
+                const explorationPtr = Module._getExplorationSteps();
+                const explorationCount = Module._getExplorationStepCount();
+                const explorationData = new Int32Array(Module.HEAP32.buffer, explorationPtr, explorationCount * 2);
+
+                const pathPtr = Module._getPath();
+                const pathLength = Module._getPathLength();
+                const pathData = new Int32Array(Module.HEAP32.buffer, pathPtr, pathLength * 2);
+
+                
+                for (let i = 0; i < explorationCount; i++) {
+                    drawMaze();
+
+                    
+                    ctx.fillStyle = 'rgba(255, 165, 0, 0.5)'; 
+                    for (let j = 0; j <= i; j++) {
+                        const x = explorationData[j * 2];
+                        const y = explorationData[j * 2 + 1];
+                        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                    }
+
+                    await sleep(50); 
+                }
+
+                
+                for (let i = pathLength - 1; i >= 0; i--) {
+                    drawMaze();
+
+                    
+                    ctx.fillStyle = 'rgba(255, 165, 0, 0.5)'; 
+                    for (let j = 0; j < explorationCount; j++) {
+                        const x = explorationData[j * 2];
+                        const y = explorationData[j * 2 + 1];
+                        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                    }
+
+                    
+                    ctx.fillStyle = 'rgba(0, 255, 0, 0.5)'; 
+                    for (let j = pathLength - 1; j >= i; j--) {
+                        const x = pathData[j * 2];
+                        const y = pathData[j * 2 + 1];
+                        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                    }
+
+                    await sleep(100); 
+                }
+
+                
+                drawMaze();
+
+                
+                ctx.fillStyle = 'rgba(255, 165, 0, 0.5)';
+                for (let i = 0; i < explorationCount; i++) {
+                    const x = explorationData[i * 2];
+                    const y = explorationData[i * 2 + 1];
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
+
+                
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
+                for (let i = 0; i < pathLength; i++) {
+                    const x = pathData[i * 2];
+                    const y = pathData[i * 2 + 1];
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
             }
 
             drawMaze();
+
+            
+            document.getElementById('solveDFS').addEventListener('click', async () => {
+                Module._solveMazeDFS();
+                await animateSearchAndPath();
+            });
+
+            
+            document.getElementById('solveBFS').addEventListener('click', async () => {
+                Module._solveMazeBFS();
+                await animateSearchAndPath();
+            });
+
+            
+            document.addEventListener('keydown', function(e) {
+                let newX = player.x;
+                let newY = player.y;
+
+                if (e.key === 'ArrowUp') newY--;
+                if (e.key === 'ArrowDown') newY++;
+                if (e.key === 'ArrowLeft') newX--;
+                if (e.key === 'ArrowRight') newX++;
+
+                if (newX >= 0 && newX < mazeSize && newY >= 0 && newY < mazeSize) {
+                    const baseIndex = (player.y * mazeSize + player.x) * 4;
+                    const walls = mazeData.slice(baseIndex, baseIndex + 4);
+
+                    if (e.key === 'ArrowUp' && !walls[0]) player.y--;
+                    if (e.key === 'ArrowRight' && !walls[1]) player.x++;
+                    if (e.key === 'ArrowDown' && !walls[2]) player.y++;
+                    if (e.key === 'ArrowLeft' && !walls[3]) player.x--;
+
+                    drawMaze();
+                }
+            });
         });
     </script>
 </body>
