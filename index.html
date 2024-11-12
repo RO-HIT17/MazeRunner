@@ -2,31 +2,11 @@
 <html>
 <head>
     <title>Maze Generator and Solver</title>
-    <style>
-        canvas {
-            border: 2px solid #333;
-            background-color: #fff;
-        }
-        #controls {
-            margin: 20px;
-        }
-        #controls button, #controls select, #controls input {
-            margin: 5px;
-            padding: 10px;
-            font-size: 16px;
-        }
-        #sizeInput {
-            width: 60px;
-        }
-        #message {
-            font-size: 18px;
-            color: green;
-            margin-top: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Maze Generator and Solver</h1>
+    <div id="scoreDisplay">Score: 100</div>
     <div id="controls">
         <label for="algorithmSelect">Algorithm:</label>
         <select id="algorithmSelect">
@@ -42,7 +22,9 @@
         <button id="solveMaze">Solve Maze</button>
         <button id="resetMaze">Reset Maze</button>
     </div>
-    <canvas id="mazeCanvas" width="600" height="600"></canvas>
+    <div id="mazeContainer">
+        <canvas id="mazeCanvas" width="600" height="600"></canvas>
+    </div>
     <div id="message"></div>
     <script src="maze.js"></script>
     <script>
@@ -281,35 +263,80 @@
             ctx.stroke();
         }
         
-        document.addEventListener('keydown', function(e) {
-            if (gameFinished) return;
+            let score = 100;
 
-            let newX = player.x;
-            let newY = player.y;
-
-            if (e.key === 'ArrowUp') newY--;
-            if (e.key === 'ArrowDown') newY++;
-            if (e.key === 'ArrowLeft') newX--;
-            if (e.key === 'ArrowRight') newX++;
-
-            if (newX >= 0 && newX < mazeSize && newY >= 0 && newY < mazeSize) {
-                const baseIndex = (player.y * mazeSize + player.x) * 4;
-                const walls = mazeData.slice(baseIndex, baseIndex + 4);
-
-                if (e.key === 'ArrowUp' && !walls[0]) player.y--;
-                if (e.key === 'ArrowRight' && !walls[1]) player.x++;
-                if (e.key === 'ArrowDown' && !walls[2]) player.y++;
-                if (e.key === 'ArrowLeft' && !walls[3]) player.x--;
-
-                drawMaze();
-
-                
-                if (player.x === endPoint.x && player.y === endPoint.y) {
-                    gameFinished = true;
-                    document.getElementById('message').innerText = 'Congratulations! You reached the destination!';
-                }
+            function ScoreNode(value) {
+                this.value = value;
+                this.next = null;
             }
-        });
+
+            let scoreHead = new ScoreNode(score);
+
+            function decreaseScore(amount) {
+                score -= amount;
+                if (score < 0) score = 0;
+
+                let newNode = new ScoreNode(score);
+                newNode.next = scoreHead;
+                scoreHead = newNode;
+
+                document.getElementById('scoreDisplay').innerText = `Score: ${score}`;
+            }
+
+            function showMessage(message) {
+                alert(message);
+            }
+
+            document.addEventListener('keydown', function(e) {
+                if (gameFinished) return;
+
+                let newX = player.x;
+                let newY = player.y;
+
+                if (e.key === 'ArrowUp') newY--;
+                if (e.key === 'ArrowDown') newY++;
+                if (e.key === 'ArrowLeft') newX--;
+                if (e.key === 'ArrowRight') newX++;
+
+                if (newX >= 0 && newX < mazeSize && newY >= 0 && newY < mazeSize) {
+                    const baseIndex = (player.y * mazeSize + player.x) * 4;
+                    const walls = mazeData.slice(baseIndex, baseIndex + 4);
+
+                    if (e.key === 'ArrowUp' && !walls[0]) player.y--;
+                    if (e.key === 'ArrowRight' && !walls[1]) player.x++;
+                    if (e.key === 'ArrowDown' && !walls[2]) player.y++;
+                    if (e.key === 'ArrowLeft' && !walls[3]) player.x--;
+
+                    drawMaze();
+                    decreaseScore(1);
+
+                    if (player.x === endPoint.x && player.y === endPoint.y) {
+                        gameFinished = true;
+                        showMessage('Congratulations! You reached the destination!');
+                        showMessage(`Your final score is: ${score}`);
+                    }
+
+                    if (score <= 0) {
+                        gameFinished = true;
+                        showMessage('Game Over! Your score reached zero.');
+                    }
+                }
+            });
+
+            async function solveMaze() {
+                const algorithm = document.getElementById('algorithmSelect').value;
+                if (algorithm === 'DFS') {
+                    Module._solveMazeDFS();
+                } else if (algorithm === 'BFS') {
+                    Module._solveMazeBFS();
+                } else if (algorithm === 'Dijkstra') {
+                    Module._solveMazeDijkstra();
+                }
+
+                await animateSearchAndPath();
+
+                showMessage('Maze solved using ' + algorithm + ' algorithm.');
+            }
     </script>
 </body>
 </html>
