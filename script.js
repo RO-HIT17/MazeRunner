@@ -99,12 +99,22 @@ const canvas = document.getElementById('mazeCanvas');
                 scoreList.appendChild(listItem);
             });
 
-            document.getElementById('scoreHistory').style.display = 'block';
+            document.getElementById('scoreHistoryModal').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        }
+
+        function closeScoreHistory() {
+            document.getElementById('scoreHistoryModal').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
         }
 
         document.getElementById('closeScoreHistory').addEventListener('click', () => {
             document.getElementById('scoreHistory').style.display = 'none';
         });
+        
+        document.getElementById('showScoreHistory').addEventListener('click', displayScoreHistory);
+        document.getElementById('closeScoreHistory').addEventListener('click', closeScoreHistory);
+        document.getElementById('overlay').addEventListener('click', closeScoreHistory);
 
         function resetMaze() {
             document.getElementById('message').innerText = '';
