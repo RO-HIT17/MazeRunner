@@ -1,13 +1,9 @@
-/* styles.css */
-
-/* Reset default browser styles */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* Body styling */
 body {
     display: flex;
     flex-direction: column;
@@ -19,21 +15,18 @@ body {
     padding: 20px;
 }
 
-/* Header styling */
 h1 {
     margin-bottom: 20px;
     text-align: center;
     color: #333;
 }
 
-/* Score display */
 #scoreDisplay {
     font-size: 1.5em;
     margin-bottom: 20px;
     color: #555;
 }
 
-/* Controls container */
 #controls {
     display: flex;
     flex-wrap: wrap;
@@ -43,13 +36,11 @@ h1 {
     justify-content: center;
 }
 
-/* Labels styling */
 label {
     font-size: 1em;
     color: #333;
 }
 
-/* Select and input styling */
 #algorithmSelect,
 #sizeInput {
     padding: 8px 12px;
@@ -65,7 +56,6 @@ label {
     border-color: #666;
 }
 
-/* Buttons container */
 #controls-buttons {
     display: flex;
     gap: 10px;
@@ -73,7 +63,6 @@ label {
     justify-content: center;
 }
 
-/* Buttons styling */
 button {
     padding: 10px 20px;
     font-size: 1em;
@@ -94,14 +83,12 @@ button:active {
     transform: translateY(0);
 }
 
-/* Canvas styling */
 #mazeCanvas {
     border: 2px solid #333;
     margin-bottom: 20px;
     background-color: #fff;
 }
 
-/* Message display */
 #message {
     font-size: 1.2em;
     margin-top: 20px;
@@ -109,9 +96,8 @@ button:active {
     color: #333;
 }
 
-/* Score History Modal */
 #scoreHistoryModal {
-    display: none; /* Hidden by default */
+    display: none; 
     position: fixed;
     top: 50%;
     left: 50%;
@@ -127,9 +113,8 @@ button:active {
     animation: fadeIn 0.3s ease-out;
 }
 
-/* Overlay styling */
 #overlay {
-    display: none; /* Hidden by default */
+    display: none; 
     position: fixed;
     top: 0;
     left: 0;
@@ -140,7 +125,7 @@ button:active {
     animation: fadeIn 0.3s ease-out;
 }
 
-/* Active state to display modal and overlay */
+
 #scoreHistoryModal.active,
 #overlay.active {
     display: block;
@@ -153,7 +138,7 @@ button:active {
     color: #333;
 }
 
-/* Score List styling */
+
 #scoreList {
     list-style-type: none;
     max-height: 300px;
@@ -168,7 +153,7 @@ button:active {
     color: #555;
 }
 
-/* Close Button styling */
+
 #closeScoreHistory {
     display: block;
     margin: 0 auto;
@@ -190,7 +175,6 @@ button:active {
     transform: translateY(0);
 }
 
-/* Animation for modal and overlay */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -202,7 +186,6 @@ button:active {
     }
 }
 
-/* Responsive adjustments */
 @media (max-width: 600px) {
     #scoreHistoryModal {
         width: 90%;
