@@ -32,6 +32,7 @@
         <select id="algorithmSelect">
             <option value="DFS">Depth-First Search</option>
             <option value="BFS">Breadth-First Search</option>
+            <option value="Dijkstra">Dijkstra's Algorithm</option>
         </select>
 
         <label for="sizeInput">Maze Size:</label>
@@ -194,53 +195,84 @@
             } else if (algorithm === 'BFS') {
                 Module._solveMazeBFS();
             }
+            else if (algorithm === 'Dijkstra') {
+                Module._solveMazeDijkstra();
+            }
 
             await animateSearchAndPath();
         }
 
         async function animateSearchAndPath() {
+            
             const explorationPtr = Module._getExplorationSteps();
             const explorationCount = Module._getExplorationStepCount();
             const explorationData = new Int32Array(Module.HEAP32.buffer, explorationPtr, explorationCount * 2);
-
+        
             const pathPtr = Module._getPath();
             const pathLength = Module._getPathLength();
             const pathData = new Int32Array(Module.HEAP32.buffer, pathPtr, pathLength * 2);
-
+        
             
-            for (let i = 0; i < explorationCount; i++) {
+            const algorithm = document.getElementById('algorithmSelect').value;
+        
+            
+            let exploredColor = 'rgba(173, 216, 230, 0.5)'; 
+            let pathColor = 'rgba(50, 205, 50, 0.6)';       
+            let pathLineColor = 'red';
+        
+            if (algorithm === 'BFS') {
+                exploredColor = 'rgba(255, 165, 0, 0.5)'; 
+            } else if (algorithm === 'DFS') {
+                exploredColor = 'rgba(138, 43, 226, 0.5)'; 
+            } else if (algorithm === 'Dijkstra') {
+                exploredColor = 'rgba(173, 216, 230, 0.5)'; 
+            }
+        
+            
+            const sleepDuration = 10; 
+        
+            
+            for (let i = 0; i < explorationData.length / 2; i++) {
                 drawMaze();
-
+        
                 
-                ctx.fillStyle = 'rgba(255, 165, 0, 0.5)'; 
+                ctx.fillStyle = exploredColor;
                 for (let j = 0; j <= i; j++) {
                     const x = explorationData[j * 2];
                     const y = explorationData[j * 2 + 1];
                     ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
                 }
-
-                await sleep(50); 
+        
+                await sleep(sleepDuration);
             }
-
+        
             
             drawMaze();
-
+        
             
-            ctx.fillStyle = 'rgba(255, 165, 0, 0.5)';
-            for (let i = 0; i < explorationCount; i++) {
+            ctx.fillStyle = exploredColor;
+            for (let i = 0; i < explorationData.length / 2; i++) {
                 const x = explorationData[i * 2];
                 const y = explorationData[i * 2 + 1];
                 ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
             }
-
+        
             
-            ctx.strokeStyle = 'green';
-            ctx.lineWidth = 4;
+            ctx.fillStyle = pathColor;
+            for (let i = pathLength - 1; i >= 0; i--) {
+                const x = pathData[i * 2];
+                const y = pathData[i * 2 + 1];
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            }
+        
+            
+            ctx.strokeStyle = pathLineColor;
+            ctx.lineWidth = 3;
             ctx.beginPath();
             const startX = pathData[(pathLength - 1) * 2] * cellSize + cellSize / 2;
             const startY = pathData[(pathLength - 1) * 2 + 1] * cellSize + cellSize / 2;
             ctx.moveTo(startX, startY);
-
+        
             for (let i = pathLength - 2; i >= 0; i--) {
                 const x = pathData[i * 2] * cellSize + cellSize / 2;
                 const y = pathData[i * 2 + 1] * cellSize + cellSize / 2;
@@ -248,7 +280,6 @@
             }
             ctx.stroke();
         }
-
         
         document.addEventListener('keydown', function(e) {
             if (gameFinished) return;

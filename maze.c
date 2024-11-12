@@ -2,6 +2,7 @@
 #include <time.h>
 #include <string.h>
 #include <emscripten/emscripten.h>
+#include <limits.h>
 
 #define MAX_SIZE 50
 
@@ -29,6 +30,14 @@ typedef struct {
     int front, rear, size;
     int capacity;
 } Queue;
+
+typedef struct {
+    Point* data;
+    int* dist;
+    int size;
+    int capacity;
+} MinHeap;
+
 
 int mazeSize;
 AdjList graph[MAX_SIZE][MAX_SIZE];
@@ -251,6 +260,81 @@ void freeQueue(Queue* queue) {
 }
 
 
+MinHeap* createMinHeap(int capacity) {
+    MinHeap* heap = (MinHeap*)malloc(sizeof(MinHeap));
+    heap->data = (Point*)malloc(sizeof(Point) * capacity);
+    heap->dist = (int*)malloc(sizeof(int) * capacity);
+    heap->size = 0;
+    heap->capacity = capacity;
+    return heap;
+}
+
+void swap(MinHeap* heap, int i, int j) {
+    Point tempPoint = heap->data[i];
+    heap->data[i] = heap->data[j];
+    heap->data[j] = tempPoint;
+
+    int tempDist = heap->dist[i];
+    heap->dist[i] = heap->dist[j];
+    heap->dist[j] = tempDist;
+}
+
+void minHeapifyUp(MinHeap* heap, int idx) {
+    while (idx > 0 && heap->dist[(idx - 1) / 2] > heap->dist[idx]) {
+        swap(heap, idx, (idx - 1) / 2);
+        idx = (idx - 1) / 2;
+    }
+}
+
+void minHeapifyDown(MinHeap* heap, int idx) {
+    int smallest = idx;
+    int left = idx * 2 + 1;
+    int right = idx * 2 + 2;
+
+    if (left < heap->size && heap->dist[left] < heap->dist[smallest])
+        smallest = left;
+    if (right < heap->size && heap->dist[right] < heap->dist[smallest])
+        smallest = right;
+
+    if (smallest != idx) {
+        swap(heap, idx, smallest);
+        minHeapifyDown(heap, smallest);
+    }
+}
+
+void insertHeap(MinHeap* heap, Point p, int distance) {
+    if (heap->size == heap->capacity) return;
+
+    heap->data[heap->size] = p;
+    heap->dist[heap->size] = distance;
+    heap->size++;
+    minHeapifyUp(heap, heap->size - 1);
+}
+
+Point extractMin(MinHeap* heap, int* distance) {
+    if (heap->size == 0) {
+        Point p = {-1, -1};
+        *distance = INT_MAX;
+        return p;
+    }
+
+    Point minPoint = heap->data[0];
+    *distance = heap->dist[0];
+
+    heap->data[0] = heap->data[heap->size - 1];
+    heap->dist[0] = heap->dist[heap->size - 1];
+    heap->size--;
+    minHeapifyDown(heap, 0);
+
+    return minPoint;
+}
+
+void freeMinHeap(MinHeap* heap) {
+    free(heap->data);
+    free(heap->dist);
+    free(heap);
+}
+
 EMSCRIPTEN_KEEPALIVE
 void solveMazeDFS() {
     Stack* stack = createStack(mazeSize * mazeSize);
@@ -352,4 +436,67 @@ void solveMazeBFS() {
     }
 
     freeQueue(queue);
+}
+
+
+EMSCRIPTEN_KEEPALIVE
+void solveMazeDijkstra() {
+    int dist[MAX_SIZE][MAX_SIZE];
+    int previous[MAX_SIZE][MAX_SIZE][2];
+    int inSet[MAX_SIZE][MAX_SIZE];
+
+    explorationStepCount = 0;  
+    pathLength = 0;           
+    memset(visited, 0, sizeof(visited)); 
+
+    for (int y = 0; y < mazeSize; y++) {
+        for (int x = 0; x < mazeSize; x++) {
+            dist[y][x] = INT_MAX;
+            previous[y][x][0] = previous[y][x][1] = -1;
+            inSet[y][x] = 0; 
+        }
+    }
+
+    MinHeap* heap = createMinHeap(mazeSize * mazeSize);
+    dist[startPoint.y][startPoint.x] = 0;
+    insertHeap(heap, startPoint, 0);
+
+    while (heap->size > 0) {
+        int currentDist;
+        Point u = extractMin(heap, &currentDist);
+
+        if (inSet[u.y][u.x]) continue; 
+        inSet[u.y][u.x] = 1;
+        explorationSteps[explorationStepCount++] = u;
+
+        if (u.x == endPoint.x && u.y == endPoint.y) {
+            
+            pathLength = 0;
+            Point curr = u;
+            while (curr.x != -1 && curr.y != -1) {
+                path[pathLength++] = curr;
+                int px = previous[curr.y][curr.x][0];
+                int py = previous[curr.y][curr.x][1];
+                curr.x = px;
+                curr.y = py;
+            }
+            break;
+        }
+
+        Node* node = graph[u.y][u.x].head;
+        while (node != NULL) {
+            if (!inSet[node->y][node->x]) {
+                int alt = dist[u.y][u.x] + 1; 
+                if (alt < dist[node->y][node->x]) {
+                    dist[node->y][node->x] = alt;
+                    previous[node->y][node->x][0] = u.x;
+                    previous[node->y][node->x][1] = u.y;
+                    insertHeap(heap, (Point){node->x, node->y}, alt);
+                }
+            }
+            node = node->next;
+        }
+    }
+
+    freeMinHeap(heap);
 }
