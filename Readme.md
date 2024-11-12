@@ -16,10 +16,10 @@ The `MinHeap` is a binary heap data structure used to implement Dijkstra's algor
 - **MinHeapify Up/Down**: Maintains the heap property by adjusting the position of elements.
 
 Relevant code excerpts:
-- [Create MinHeap](emsdk/maze.c#L323)
-- [Insert](emsdk/maze.c#L350)
-- [Extract Min](emsdk/maze.c#L373)
-- [MinHeapify Up/Down](emsdk/maze.c#L323)
+- [Create MinHeap](maze.c#L323)
+- [Insert](maze.c#L350)
+- [Extract Min](maze.c#L373)
+- [MinHeapify Up/Down](maze.c#L323)
 
 ### 2. Queue
 
@@ -31,10 +31,10 @@ The `Queue` is a FIFO (First-In-First-Out) data structure used to implement the 
 - **Is Queue Empty**: Checks if the queue is empty.
 
 Relevant code excerpts:
-- [Create Queue](emsdk/maze.c#L286)
-- [Enqueue](emsdk/maze.c#L286)
-- [Dequeue](emsdk/maze.c#L286)
-- [Is Queue Empty](emsdk/maze.c#L286)
+- [Create Queue](maze.c#L286)
+- [Enqueue](maze.c#L286)
+- [Dequeue](maze.c#L286)
+- [Is Queue Empty](maze.c#L286)
 
 ### 3. Stack
 
@@ -46,18 +46,18 @@ The `Stack` is a LIFO (Last-In-First-Out) data structure used to implement the D
 - **Is Stack Empty**: Checks if the stack is empty.
 
 Relevant code excerpts:
-- [Create Stack](emsdk/maze.c#L241)
-- [Push](emsdk/maze.c#L241)
-- [Pop](emsdk/maze.c#L241)
-- [Is Stack Empty](emsdk/maze.c#L241)
+- [Create Stack](maze.c#L241)
+- [Push](maze.c#L241)
+- [Pop](maze.c#L241)
+- [Is Stack Empty](maze.c#L241)
 
 ### 4. Graph
 
 The `Graph` is used to represent the maze, where each cell is a node, and edges represent the possible paths between cells. The graph is used in the maze generation and solving algorithms.
 
 Relevant code excerpts:
-- [Generate Maze](emsdk/maze.c#L91)
-- [Add Edge](emsdk/maze.c#L91)
+- [Generate Maze](maze.c#L91)
+- [Add Edge](maze.c#L91)
 
 ## Algorithms
 
@@ -66,28 +66,28 @@ Relevant code excerpts:
 DFS is used to explore the maze by following a path until it reaches the end or a dead end, then backtracking to explore other paths. It uses a stack to keep track of the current path.
 
 Relevant code excerpts:
-- [Solve Maze DFS](emsdk/maze.c#L383)
+- [Solve Maze DFS](maze.c#L383)
 
 ### 2. Breadth-First Search (BFS)
 
 BFS explores the maze level by level, ensuring the shortest path is found. It uses a queue to keep track of the current level of nodes to explore.
 
 Relevant code excerpts:
-- [Solve Maze BFS](emsdk/maze.c#L445)
+- [Solve Maze BFS](maze.c#L445)
 
 ### 3. Dijkstra's Algorithm
 
 Dijkstra's algorithm finds the shortest path from the start to the end of the maze using a priority queue (MinHeap) to explore the nodes with the smallest distance first.
 
 Relevant code excerpts:
-- [Solve Maze Dijkstra](emsdk/maze.c#L373)
+- [Solve Maze Dijkstra](maze.c#L373)
 
 ## WebAssembly Integration
 
 The project uses WebAssembly to bridge the C code with JavaScript, enabling the maze generation and solving algorithms to be executed in the browser.
 
 Relevant code excerpts:
-- [WebAssembly Functions](emsdk/maze.c#L125)
+- [WebAssembly Functions](maze.c#L125)
 
 ## User Interface
 
