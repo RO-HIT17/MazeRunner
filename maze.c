@@ -38,13 +38,19 @@ typedef struct {
     int capacity;
 } MinHeap;
 
+typedef struct ScoreNode {
+    int score;
+    struct ScoreNode* next;
+} ScoreNode;
 
+
+ScoreNode* scoreHead = NULL;
 int mazeSize;
 AdjList graph[MAX_SIZE][MAX_SIZE];
 int visited[MAX_SIZE][MAX_SIZE];
 Point path[MAX_SIZE * MAX_SIZE];
 int pathLength;
-
+int currentScore = 0;
 
 Point explorationSteps[MAX_SIZE * MAX_SIZE];
 int explorationStepCount;
@@ -154,10 +160,10 @@ int* getMaze() {
 
             Node* node = graph[y][x].head;
             while (node != NULL) {
-                if (node->x == x && node->y == y - 1) maze[index] = 0; // Top
-                if (node->x == x + 1 && node->y == y) maze[index + 1] = 0; // Right
-                if (node->x == x && node->y == y + 1) maze[index + 2] = 0; // Bottom
-                if (node->x == x - 1 && node->y == y) maze[index + 3] = 0; // Left
+                if (node->x == x && node->y == y - 1) maze[index] = 0; 
+                if (node->x == x + 1 && node->y == y) maze[index + 1] = 0; 
+                if (node->x == x && node->y == y + 1) maze[index + 2] = 0; 
+                if (node->x == x - 1 && node->y == y) maze[index + 3] = 0; 
                 node = node->next;
             }
             index += 4;
@@ -191,6 +197,60 @@ int getPathLength() {
     return pathLength;
 }
 
+EMSCRIPTEN_KEEPALIVE
+void initializeScore(int initialScore) {
+    
+    ScoreNode* temp;
+    while (scoreHead != NULL) {
+        temp = scoreHead;
+        scoreHead = scoreHead->next;
+        free(temp);
+    }
+    currentScore = initialScore;
+    
+    scoreHead = (ScoreNode*)malloc(sizeof(ScoreNode));
+    scoreHead->score = currentScore;
+    scoreHead->next = NULL;
+}
+
+
+EMSCRIPTEN_KEEPALIVE
+void decreaseScore(int amount) {
+    currentScore -= amount;
+    if (currentScore < 0) currentScore = 0;
+
+    
+    ScoreNode* newNode = (ScoreNode*)malloc(sizeof(ScoreNode));
+    newNode->score = currentScore;
+    newNode->next = scoreHead;
+    scoreHead = newNode;
+}
+
+
+EMSCRIPTEN_KEEPALIVE
+int* getScoreHistory(int* length) {
+    int count = 0;
+    ScoreNode* temp = scoreHead;
+    while (temp != NULL) {
+        count++;
+        temp = temp->next;
+    }
+    *length = count;
+
+    int* scores = (int*)malloc(sizeof(int) * count);
+    temp = scoreHead;
+    for (int i = 0; i < count; i++) {
+        scores[i] = temp->score;
+        temp = temp->next;
+    }
+    return scores;
+}
+
+
+EMSCRIPTEN_KEEPALIVE
+int getCurrentScore() {
+    return currentScore;
+}
 
 Stack* createStack(int capacity) {
     Stack* stack = (Stack*)malloc(sizeof(Stack));

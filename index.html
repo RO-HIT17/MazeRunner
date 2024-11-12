@@ -21,10 +21,17 @@
         <button id="generateMaze">Generate Maze</button>
         <button id="solveMaze">Solve Maze</button>
         <button id="resetMaze">Reset Maze</button>
+        <button id="showScoreHistory">Show Score History</button>
     </div>
     <div id="mazeContainer">
         <canvas id="mazeCanvas" width="600" height="600"></canvas>
     </div>
+    <div id="scoreHistory" style="display: none;">
+        <h2>Score History</h2>
+        <ul id="scoreList"></ul>
+        <button id="closeScoreHistory">Close</button>
+    </div>
+    
     <div id="message"></div>
     <script src="maze.js"></script>
     <script src="script.js"></script>
