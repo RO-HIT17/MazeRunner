@@ -170,7 +170,7 @@ const canvas = document.getElementById('mazeCanvas');
             
             let exploredColor = 'rgba(173, 216, 230, 0.5)'; 
             let pathColor = 'rgba(50, 205, 50, 0.6)';       
-            let pathLineColor = 'red';
+            let pathLineColor = 'green';
         
             if (algorithm === 'BFS') {
                 exploredColor = 'rgba(255, 165, 0, 0.5)'; 
@@ -181,7 +181,7 @@ const canvas = document.getElementById('mazeCanvas');
             }
         
             
-            const sleepDuration = 10; 
+            const sleepDuration = 25; 
         
             
             for (let i = 0; i < explorationData.length / 2; i++) {
@@ -233,7 +233,7 @@ const canvas = document.getElementById('mazeCanvas');
             ctx.stroke();
         }
         
-            let score = 100;
+            let score = 1000;
 
             function ScoreNode(value) {
                 this.value = value;
